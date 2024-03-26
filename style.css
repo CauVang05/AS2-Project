@@ -144,6 +144,11 @@ div p {
     border-radius: 100%;
     background-color: white;
 }
+.collected{
+    opacity: 0;
+    border-radius: 100%;
+    background-color: white;
+}
 
 .wall {
     background-color: blue;

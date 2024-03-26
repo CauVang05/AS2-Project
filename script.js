@@ -4,7 +4,20 @@ let leftPressed = false;
 let rightPressed = false;
 let movEnableDirection = {UP:true, DOWN:true, LEFT:true, RIGHT:true};
 
+let startEnable = false;
+let playerStatus = null; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
+
+let totalPoint = 0; //default is 0
+const dotPoint = 1; //able to modify
+
+
+let playerTop = 0;
+let playerLeft = 0;
+const step = 1;
+
 const main = document.querySelector('main');
+const startButton = document.querySelector('.start');
+const scoreUpdating = document.querySelector('.score > p');
 
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
@@ -49,7 +62,38 @@ for (let y of maze) {
     }
 }
 
+//Game operation
+function startGame(){
+    startEnable = true;
+    playerStatus = "ALIVE";
+    startButton.style.display = 'none';
+} 
+
+function levelUp(){
+    startEnable = false;
+    playerStatus = 'UPLEVEL';
+    startButton.style.display = 'flex';
+    console.log('UP level');
+}
+
+// async function setPosition() {
+//     await new Promise(resolve => setTimeout(resolve, 100));
+//     playerTop = 0;
+//     playerLeft = 0;
+//     console.log('UP level');
+// }
+
+function collectPoint(collected){
+    if(collected){
+        totalPoint += dotPoint;
+        scoreUpdating.textContent = totalPoint;
+    }
+}
+
 //Player movement
+const player = document.querySelector('#player');
+const playerMouth = player.querySelector('.mouth');
+
 function keyUp(event) {
     if (event.key === 'ArrowUp') {
         upPressed = false;
@@ -78,12 +122,6 @@ function keyDown(event) {
     }
 }
 
-const player = document.querySelector('#player');
-const playerMouth = player.querySelector('.mouth');
-let playerTop = 0;
-let playerLeft = 0;
-let step = 1;
-
 function checkingCollision(direction, __step){
     const walls = document.querySelectorAll('.wall');
     const enemies = document.querySelectorAll('.enemy');
@@ -100,8 +138,14 @@ function checkingCollision(direction, __step){
     let __hitPoint = false;
 
     // Check collision with point
+    let __pointLeft = 0;
     points.forEach(point => {
         const pointRect = point.getBoundingClientRect();
+
+        if(point.classList.contains('point')) {
+            __pointLeft++;
+        }
+
         if(
         pacmanRect.right > pointRect.left &&
         pacmanRect.left < pointRect.right &&
@@ -110,8 +154,13 @@ function checkingCollision(direction, __step){
         ){
             // Collision detected
             __hitPoint = true;
+            point.className = 'collected';
+            collectPoint(__hitPoint);
         }
     });
+    if(__pointLeft == 0){ //level up incresing difficulty
+        levelUp();
+    }
 
     // Check collision with wall (next step depended on direction)
     walls.forEach(wall => {
@@ -125,7 +174,6 @@ function checkingCollision(direction, __step){
                 {
                     __hitWall = true;
                     movEnableDirection[direction] = false;
-                    playerTop -= step; //auto set position of pacman inside the maze
                     // console.log(movEnableDirection);
                 }
                 break;
@@ -138,7 +186,6 @@ function checkingCollision(direction, __step){
                 {
                     __hitWall = true;
                     movEnableDirection[direction] = false;
-                    playerTop += step; //auto set position of pacman inside the maze
                     // console.log(movEnableDirection);
                 }
                 break;
@@ -151,7 +198,6 @@ function checkingCollision(direction, __step){
                 {
                     __hitWall = true;
                     movEnableDirection[direction] = false;
-                    playerLeft += step; //auto set position of pacman inside the maze
                     // console.log(movEnableDirection);
                 }
                 break;
@@ -164,7 +210,6 @@ function checkingCollision(direction, __step){
                 {
                     __hitWall = true;
                     movEnableDirection[direction] = false;
-                    playerLeft -= step; //auto set position of pacman inside the maze
                     // console.log(movEnableDirection);
                 }
                 break;
@@ -197,45 +242,59 @@ function checkingCollision(direction, __step){
 let checkValues;
 
 setInterval(function() {
-    // console.log('direction: ',[downPressed,upPressed,leftPressed,rightPressed]);
-    if(downPressed) {
-        if(movEnableDirection["DOWN"]){ 
-            playerTop += step;
+    if(startEnable){
+        if(downPressed) {
+            checkValues = checkingCollision("DOWN",step);
+            if(movEnableDirection["DOWN"]){ 
+                playerTop += step;
+            }else{
+                playerTop -= 1; //auto set position of pacman inside the maze
+            }
+            player.style.top = playerTop + 'px';
+            playerMouth.classList = 'down';
+            // console.log(movEnableDirection);
         }
-        checkValues = checkingCollision("DOWN",step);
-        player.style.top = playerTop + 'px';
-        playerMouth.classList = 'down';
-        // console.log(movEnableDirection);
-    }
-    else if(upPressed) {
-        if(movEnableDirection["UP"]){ 
-            playerTop -= step;
+        else if(upPressed) {
+            checkValues = checkingCollision("UP",step);
+            if(movEnableDirection["UP"]){ 
+                playerTop -= step;
+            }else{
+                playerTop += 1; //auto set position of pacman inside the maze
+            }
+            player.style.top = playerTop + 'px';        
+            playerMouth.classList = 'up';
+            // console.log(movEnableDirection);
         }
-        checkValues = checkingCollision("UP",step);
+        else if(leftPressed) {
+            checkValues = checkingCollision("LEFT",step);
+            if(movEnableDirection["LEFT"]){ 
+                playerLeft -= step;
+            }else{
+                playerLeft += 1; //auto set position of pacman inside the maze
+            }
+            player.style.left = playerLeft + 'px';
+            playerMouth.classList = 'left';
+            // console.log(movEnableDirection);
+        }
+        else if(rightPressed) {
+            checkValues = checkingCollision("RIGHT",step);
+            if(movEnableDirection["RIGHT"]){ 
+                playerLeft += step;
+            }else{
+                playerLeft -= 1; //auto set position of pacman inside the maze
+            }
+            player.style.left = playerLeft + 'px';
+            playerMouth.classList = 'right';
+            // console.log(movEnableDirection);
+        }
+    }else{
+        playerTop = 0;
+        playerLeft = 0;
+        player.style.left = playerLeft + 'px';
         player.style.top = playerTop + 'px';        
-        playerMouth.classList = 'up';
-        // console.log(movEnableDirection);
     }
-    else if(leftPressed) {
-        if(movEnableDirection["LEFT"]){ 
-            playerLeft -= step;
-        }
-        checkValues = checkingCollision("LEFT",step);
-        player.style.left = playerLeft + 'px';
-        playerMouth.classList = 'left';
-        // console.log(movEnableDirection);
-    }
-    else if(rightPressed) {
-        if(movEnableDirection["RIGHT"]){ 
-            playerLeft += step;
-        }
-        checkValues = checkingCollision("RIGHT",step);
-        player.style.left = playerLeft + 'px';
-        playerMouth.classList = 'right';
-        // console.log(movEnableDirection);
-    }
-    
-}, 10);
+}, 5);
 
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
+startButton.addEventListener('click',startGame);
