@@ -17,7 +17,15 @@ const step = 1;
 
 const main = document.querySelector('main');
 const startButton = document.querySelector('.start');
+const statusName = startButton.querySelector('h1');
 const scoreUpdating = document.querySelector('.score > p');
+
+// const touchDown = document.getElementById('dbttn');
+// const touchUp = document.getElementById('ubttn');
+// const touchLeft = document.getElementById('lbttn');
+// const touchRight = document.getElementById('rbttn');
+
+// const touchDirection = {dbttn:false, ubttn: false, lbttn:false, rbttn:false};
 
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
@@ -70,18 +78,17 @@ function startGame(){
 } 
 
 function levelUp(){
+    const collectedPoint = document.querySelectorAll('.collected');
     startEnable = false;
     playerStatus = 'UPLEVEL';
     startButton.style.display = 'flex';
-    console.log('UP level');
+    playerTop = 0;
+    playerLeft = 0;
+    player.style.left = playerLeft + 'px';
+    player.style.top = playerTop + 'px';  
+    statusName.textContent = 'Restart';    
+    // alert('LEVEL UP!!');
 }
-
-// async function setPosition() {
-//     await new Promise(resolve => setTimeout(resolve, 100));
-//     playerTop = 0;
-//     playerLeft = 0;
-//     console.log('UP level');
-// }
 
 function collectPoint(collected){
     if(collected){
@@ -104,6 +111,7 @@ function keyUp(event) {
     } else if (event.key === 'ArrowRight') {
         rightPressed = false;
     }
+    console.log(event);
 }
 
 function keyDown(event) {
@@ -241,7 +249,7 @@ function checkingCollision(direction, __step){
 
 let checkValues;
 
-setInterval(function() {
+function movementAction(){
     if(startEnable){
         if(downPressed) {
             checkValues = checkingCollision("DOWN",step);
@@ -287,14 +295,12 @@ setInterval(function() {
             playerMouth.classList = 'right';
             // console.log(movEnableDirection);
         }
-    }else{
-        playerTop = 0;
-        playerLeft = 0;
-        player.style.left = playerLeft + 'px';
-        player.style.top = playerTop + 'px';        
     }
-}, 5);
+}
 
+setInterval(function() {
+    movementAction();
+}, 5);
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 startButton.addEventListener('click',startGame);
