@@ -20,10 +20,13 @@ const startButton = document.querySelector('.start');
 const statusName = startButton.querySelector('h1');
 const scoreUpdating = document.querySelector('.score > p');
 
-// const touchDown = document.getElementById('dbttn');
-// const touchUp = document.getElementById('ubttn');
-// const touchLeft = document.getElementById('lbttn');
-// const touchRight = document.getElementById('rbttn');
+const touchDown = document.getElementById('dbttn');
+const touchUp = document.getElementById('ubttn');
+const touchLeft = document.getElementById('lbttn');
+const touchRight = document.getElementById('rbttn');
+const touchButtons = {DOWN : touchDown, UP : touchUp, LEFT : touchLeft, RIGHT : touchRight};
+
+let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons 
 
 // const touchDirection = {dbttn:false, ubttn: false, lbttn:false, rbttn:false};
 
@@ -101,32 +104,94 @@ function collectPoint(collected){
 const player = document.querySelector('#player');
 const playerMouth = player.querySelector('.mouth');
 
-function keyUp(event) {
-    if (event.key === 'ArrowUp') {
-        upPressed = false;
-    } else if (event.key === 'ArrowDown') {
-        downPressed = false;
-    } else if (event.key === 'ArrowLeft') {
-        leftPressed = false;
-    } else if (event.key === 'ArrowRight') {
-        rightPressed = false;
+for(let butt in touchButtons){
+    touchButtons[butt].addEventListener('mousedown',function(){
+        buttonDown(butt);
+    });
+    touchButtons[butt].addEventListener('mouseup',function(){
+        buttonUp(butt);
+    });
+    // console.log("Key: " + butt + ", Value: " + touchButtons[butt]);
+}
+
+document.addEventListener('keydown', keyDown);
+document.addEventListener('keyup', keyUp);
+
+function buttonUp(__direction){
+    if(currentTypeCtrl == 2){
+        currentTypeCtrl = 0;
+        switch(__direction){
+            case "UP":
+                upPressed = false;
+                break;
+            
+            case "DOWN":
+                downPressed = false;
+                break;
+            
+            case "LEFT":
+                leftPressed = false;
+                break;
+            
+            case "RIGHT":
+                rightPressed = false;
+                break;
+        }
+        // console.log('Button ' + __direction + ' released');
     }
-    console.log(event);
+}
+
+function buttonDown(__direction){
+    if(currentTypeCtrl == 0){
+        currentTypeCtrl = 2;
+        switch(__direction){
+            case "UP":
+                upPressed = true;
+                break;
+            
+            case "DOWN":
+                downPressed = true;
+                break;
+            
+            case "LEFT":
+                leftPressed = true;
+                break;
+            
+            case "RIGHT":
+                rightPressed = true;
+                break;
+        }
+        // console.log('Button ' + __direction + ' pressed');
+    }
+}
+
+function keyUp(event) {
+    if(currentTypeCtrl == 1){
+        currentTypeCtrl = 0;
+        if (event.key === 'ArrowUp') {
+            upPressed = false;
+        } else if (event.key === 'ArrowDown') {
+            downPressed = false;
+        } else if (event.key === 'ArrowLeft') {
+            leftPressed = false;
+        } else if (event.key === 'ArrowRight') {
+            rightPressed = false;
+        }
+    }
 }
 
 function keyDown(event) {
-    if (event.key === 'ArrowUp') {
-        movDirection = "UP";
-        upPressed = true;
-    } else if (event.key === 'ArrowDown') {
-        movDirection = "DOWN";
-        downPressed = true;
-    } else if (event.key === 'ArrowLeft') {
-        movDirection = "LEFT";
-        leftPressed = true;
-    } else if (event.key === 'ArrowRight') {
-        movDirection = "RIGHT";
-        rightPressed = true;
+    if(currentTypeCtrl == 0){
+        currentTypeCtrl = 1;
+        if (event.key === 'ArrowUp') {
+            upPressed = true;
+        } else if (event.key === 'ArrowDown') {
+            downPressed = true;
+        } else if (event.key === 'ArrowLeft') {
+            leftPressed = true;
+        } else if (event.key === 'ArrowRight') {
+            rightPressed = true;
+        }
     }
 }
 
@@ -256,7 +321,7 @@ function movementAction(){
             if(movEnableDirection["DOWN"]){ 
                 playerTop += step;
             }else{
-                playerTop -= 1; //auto set position of pacman inside the maze
+                playerTop -= 0; //auto set position of pacman inside the maze
             }
             player.style.top = playerTop + 'px';
             playerMouth.classList = 'down';
@@ -267,7 +332,7 @@ function movementAction(){
             if(movEnableDirection["UP"]){ 
                 playerTop -= step;
             }else{
-                playerTop += 1; //auto set position of pacman inside the maze
+                playerTop += 0; //auto set position of pacman inside the maze
             }
             player.style.top = playerTop + 'px';        
             playerMouth.classList = 'up';
@@ -278,7 +343,7 @@ function movementAction(){
             if(movEnableDirection["LEFT"]){ 
                 playerLeft -= step;
             }else{
-                playerLeft += 1; //auto set position of pacman inside the maze
+                playerLeft += 0; //auto set position of pacman inside the maze
             }
             player.style.left = playerLeft + 'px';
             playerMouth.classList = 'left';
@@ -289,7 +354,7 @@ function movementAction(){
             if(movEnableDirection["RIGHT"]){ 
                 playerLeft += step;
             }else{
-                playerLeft -= 1; //auto set position of pacman inside the maze
+                playerLeft -= 0; //auto set position of pacman inside the maze
             }
             player.style.left = playerLeft + 'px';
             playerMouth.classList = 'right';
@@ -301,6 +366,5 @@ function movementAction(){
 setInterval(function() {
     movementAction();
 }, 5);
-document.addEventListener('keydown', keyDown);
-document.addEventListener('keyup', keyUp);
+
 startButton.addEventListener('click',startGame);
