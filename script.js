@@ -4,11 +4,12 @@ let leftPressed = false;
 let rightPressed = false;
 let movEnableDirection = {UP:true, DOWN:true, LEFT:true, RIGHT:true};
 
-let startEnable = false;
-let playerStatus = null; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
+let movementEnable = false;
+let gameStatus = "NEWGAME"; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
 
 let totalPoint = 0; //default is 0
 const dotPoint = 1; //able to modify
+let lives = 3
 
 
 let playerTop = 0;
@@ -20,6 +21,8 @@ const startButton = document.querySelector('.start');
 const statusName = startButton.querySelector('h1');
 const scoreUpdating = document.querySelector('.score > p');
 
+const playerLives = document.querySelector('.lives > ul');
+
 const touchDown = document.getElementById('dbttn');
 const touchUp = document.getElementById('ubttn');
 const touchLeft = document.getElementById('lbttn');
@@ -27,8 +30,7 @@ const touchRight = document.getElementById('rbttn');
 const touchButtons = {DOWN : touchDown, UP : touchUp, LEFT : touchLeft, RIGHT : touchRight};
 
 let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons 
-
-// const touchDirection = {dbttn:false, ubttn: false, lbttn:false, rbttn:false};
+let hitGhostDetection = false;
 
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
@@ -75,21 +77,19 @@ for (let y of maze) {
 
 //Game operation
 function startGame(){
-    startEnable = true;
-    playerStatus = "ALIVE";
-    startButton.style.display = 'none';
+    gameAction(gameStatus);
 } 
 
 function levelUp(){
     const collectedPoint = document.querySelectorAll('.collected');
-    startEnable = false;
-    playerStatus = 'UPLEVEL';
+    movementEnable = false;
+    gameStatus = 'UPLEVEL';
     startButton.style.display = 'flex';
     playerTop = 0;
     playerLeft = 0;
     player.style.left = playerLeft + 'px';
     player.style.top = playerTop + 'px';  
-    statusName.textContent = 'Restart';    
+    statusName.textContent = 'Continue new level';    
     // alert('LEVEL UP!!');
 }
 
@@ -100,9 +100,68 @@ function collectPoint(collected){
     }
 }
 
-//Player movement
-const player = document.querySelector('#player');
-const playerMouth = player.querySelector('.mouth');
+function gameAction(status){
+    switch (status){
+        case "NEWGAME":
+            movementEnable = true;
+            gameStatus = "ALIVE";
+            if(lives == 0){
+                lives = 3;
+                player.classList.remove("dead");
+                player.style.transform = "scale(1)";
+                for (let i = 0; i<lives; i++){
+                    playerLives.children[i].style.opacity = "100%";
+                }
+            }
+            startButton.style.display = 'none';
+            break;
+
+        case "ALIVE":
+            break;
+
+        case "DEAD":
+            movementEnable = false;
+            player.classList.add("hit");
+            setTimeout(function trigger (){
+            movementEnable = true;
+            gameStatus = "ALIVE";
+            player.classList.remove("hit");},1500);
+            setTimeout(function trigger(){hitGhostDetection = false;},3000);
+            break;
+
+        case "GAMEOVER":
+            movementEnable = false;
+            player.classList.add("dead");
+            setTimeout(function trigger(){
+            gameStatus = "NEWGAME";
+            hitGhostDetection = false;
+            startButton.style.display = 'flex';
+            playerTop = 0;
+            playerLeft = 0;
+            player.style.left = playerLeft + 'px';
+            player.style.top = playerTop + 'px';  
+            statusName.textContent = 'Game Over, restart a new game?';},1500);
+            break;
+
+        case "UPLEVEL":
+            movementEnable = true;
+            gameStatus = "ALIVE";
+            startButton.style.display = 'none';
+            break;
+    }
+}
+
+function hitGhost(){
+    lives--;
+    if(lives == 0){
+        gameStatus = "GAMEOVER";
+    }else{
+        gameStatus = "DEAD"; 
+    }
+    playerLives.children[lives].style.opacity = "0%";
+    gameAction(gameStatus);
+}
+
 
 for(let butt in touchButtons){
     touchButtons[butt].addEventListener('mousedown',function(){
@@ -111,7 +170,6 @@ for(let butt in touchButtons){
     touchButtons[butt].addEventListener('mouseup',function(){
         buttonUp(butt);
     });
-    // console.log("Key: " + butt + ", Value: " + touchButtons[butt]);
 }
 
 document.addEventListener('keydown', keyDown);
@@ -194,6 +252,9 @@ function keyDown(event) {
         }
     }
 }
+//Player movement
+const player = document.querySelector('#player');
+const playerMouth = player.querySelector('.mouth');
 
 function checkingCollision(direction, __step){
     const walls = document.querySelectorAll('.wall');
@@ -306,6 +367,10 @@ function checkingCollision(direction, __step){
         ){
             // Collision detected
             __hitGhost = true;
+            if(hitGhostDetection == false){
+                hitGhostDetection = true;
+                hitGhost();
+            }
         }
     });
 
@@ -315,7 +380,7 @@ function checkingCollision(direction, __step){
 let checkValues;
 
 function movementAction(){
-    if(startEnable){
+    if(movementEnable){
         if(downPressed) {
             checkValues = checkingCollision("DOWN",step);
             if(movEnableDirection["DOWN"]){ 
