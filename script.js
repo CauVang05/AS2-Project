@@ -6,11 +6,11 @@ let movEnableDirection = {UP:true, DOWN:true, LEFT:true, RIGHT:true};
 
 let movementEnable = false;
 let gameStatus = "NEWGAME"; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
+const wallProbability = 0.3; //30% spawn wall
 
 let totalPoint = 0; //default is 0
 const dotPoint = 1; //able to modify
 let lives = 3
-
 
 let playerTop = 0;
 let playerLeft = 0;
@@ -32,66 +32,134 @@ const touchButtons = {DOWN : touchDown, UP : touchUp, LEFT : touchLeft, RIGHT : 
 let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons 
 let hitGhostDetection = false;
 
+let preMaze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+                [1, 0, 0, 1, 0, 3, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+// let otherMaze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+//                 [1, 2, 0, 0, 0, 0, 0, 0, 3, 1],
+//                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+//                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+//                 [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+//                 [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+//                 [1, 0, 0, 0, 0, 3, 0, 0, 0, 1],
+//                 [1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+//                 [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
+//                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
-let maze = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [1, 0, 0, 1, 0, 3, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
+function randomMaze(x, y){ //TODO: debug after finished almost essential requirements
+    // Establish letiables and starting grid
+    let totalCells = x*y;
+    let unvis = new Array();
+    let path = new Array();
+    for (let i = 0; i < y; i++) {
+        unvis[i] = new Array();
+        path[i] = new Array();
+        for (let j = 0; j < x; j++) {
+            // if(i == 0 || i == (y-1) || j == 0 || j == (x-1)){
+            //     unvis[i][j] = false;
+            //     path[i][j] = 1;
+            // }else{
+                unvis[i][j] = true;
+                path[i][j] = 0;
+            // }
+        }
+    }
+
+    // Set a random position to start from
+    let currentCell = [Math.floor(Math.random()*y), Math.floor(Math.random()*x)];
+    let saveCellChecked = [currentCell];
+    path[currentCell[0]][currentCell[1]] = 1;
+    unvis[currentCell[0]][currentCell[1]] = false;
+    let visited = 1;
+    
+    // Loop through all available cell positions
+    while (visited < totalCells) {
+        let pot = [[currentCell[0]-1, currentCell[1]],
+                        [currentCell[0], currentCell[1]+1],
+                        [currentCell[0]+1, currentCell[1]],
+                        [currentCell[0], currentCell[1]-1]];
+        let neighbors = new Array();
+        for(let l=0;l<4;l++){
+            if(pot[l][0] > -1 &&
+              pot[l][0] < y &&
+              pot[l][1] > -1 &&
+              pot[l][1] < x &&
+              unvis[pot[l][0]][pot[l][1]])
+            {
+                neighbors.push(pot[l]);
+            }
+        }
+        
+        if (neighbors.length){
+            nextPosition = neighbors[Math.floor(Math.random()*neighbors.length)];
+            path[nextPosition[0]][nextPosition[1]] = 1;
+            unvis[nextPosition[0]][nextPosition[1]] = false;
+            currentCell = nextPosition;
+            saveCellChecked.push(currentCell);
+            visited++;
+        }else{
+            currentCell = saveCellChecked.pop();
+        }
+    }
+    return path;
+}
 
 //Populates the maze in the HTML
-for (let y of maze) {
-    for (let x of y) {
-        let block = document.createElement('div');
-        block.classList.add('block');
+function mazeGenerator(maze){
+    for (let y of maze) {
+        for (let x of y) {
+            let block = document.createElement('div');
+            block.classList.add('block');
 
-        switch (x) {
-            case 1:
-                block.classList.add('wall');
-                break;
-            case 2:
-                block.id = 'player';
-                let mouth = document.createElement('div');
-                mouth.classList.add('mouth');
-                block.appendChild(mouth);
-                break;
-            case 3:
-                block.classList.add('enemy');
-                break;
-            default:
-                block.classList.add('point');
-                block.style.height = '1vh';
-                block.style.width = '1vh';
+            switch (x) {
+                case 1:
+                    block.classList.add('wall');
+                    break;
+                case 2:
+                    block.id = 'player';
+                    let mouth = document.createElement('div');
+                    mouth.classList.add('mouth');
+                    block.appendChild(mouth);
+                    break;
+                case 3:
+                    block.classList.add('enemy');
+                    break;
+                default:
+                    block.classList.add('point');
+                    block.style.height = '1vh';
+                    block.style.width = '1vh';
+            }
+
+            main.appendChild(block);
         }
-
-        main.appendChild(block);
     }
 }
 
+//Clear current maze and generate new maze
+function clearMaze(){
+    main.innerHTML = ''; // Clear previous maze
+    //maze = randomMaze();
+    mazeGenerator(preMaze);
+    player = document.querySelector('#player');
+    playerMouth = player.querySelector('.mouth');
+}
+
+mazeGenerator(preMaze);
+
 //Game operation
 function startGame(){
+    clearMaze();
     gameAction(gameStatus);
 } 
-
-function levelUp(){
-    const collectedPoint = document.querySelectorAll('.collected');
-    movementEnable = false;
-    gameStatus = 'UPLEVEL';
-    startButton.style.display = 'flex';
-    playerTop = 0;
-    playerLeft = 0;
-    player.style.left = playerLeft + 'px';
-    player.style.top = playerTop + 'px';  
-    statusName.textContent = 'Continue new level';    
-    // alert('LEVEL UP!!');
-}
 
 function collectPoint(collected){
     if(collected){
@@ -107,16 +175,21 @@ function gameAction(status){
             gameStatus = "ALIVE";
             if(lives == 0){
                 lives = 3;
+                clearMaze();
                 player.classList.remove("dead");
                 player.style.transform = "scale(1)";
                 for (let i = 0; i<lives; i++){
                     playerLives.children[i].style.opacity = "100%";
                 }
             }
+            scoreUpdating.textContent = totalPoint;
             startButton.style.display = 'none';
             break;
 
-        case "ALIVE":
+        case "ALIVE": //player move to another maze
+            movementEnable = true;
+            startButton.style.display = 'none';
+            clearMaze();
             break;
 
         case "DEAD":
@@ -135,6 +208,7 @@ function gameAction(status){
             setTimeout(function trigger(){
             gameStatus = "NEWGAME";
             hitGhostDetection = false;
+            totalPoint = 0;
             startButton.style.display = 'flex';
             playerTop = 0;
             playerLeft = 0;
@@ -144,9 +218,14 @@ function gameAction(status){
             break;
 
         case "UPLEVEL":
-            movementEnable = true;
-            gameStatus = "ALIVE";
-            startButton.style.display = 'none';
+            movementEnable = false;
+            gameStatus = 'ALIVE';
+            startButton.style.display = 'flex';
+            playerTop = 0;
+            playerLeft = 0;
+            player.style.left = playerLeft + 'px';
+            player.style.top = playerTop + 'px';  
+            statusName.textContent = 'Continue new level';  
             break;
     }
 }
@@ -163,17 +242,19 @@ function hitGhost(){
 }
 
 
-for(let butt in touchButtons){
-    touchButtons[butt].addEventListener('mousedown',function(){
-        buttonDown(butt);
-    });
-    touchButtons[butt].addEventListener('mouseup',function(){
-        buttonUp(butt);
-    });
-}
+// for(let butt in touchButtons){
+//     touchButtons[butt].addEventListener('mousedown',function(){
+//         buttonDown(butt);
+//     });
+//     touchButtons[butt].addEventListener('mouseup',function(){
+//         buttonUp(butt);
+//     });
+// }
 
-document.addEventListener('keydown', keyDown);
-document.addEventListener('keyup', keyUp);
+// document.addEventListener('keydown', keyDown);
+// document.addEventListener('keyup', keyUp);
+
+initEventListener();
 
 function buttonUp(__direction){
     if(currentTypeCtrl == 2){
@@ -223,22 +304,18 @@ function buttonDown(__direction){
     }
 }
 
-function keyUp(event) {
+function keyUp() {
     if(currentTypeCtrl == 1){
         currentTypeCtrl = 0;
-        if (event.key === 'ArrowUp') {
-            upPressed = false;
-        } else if (event.key === 'ArrowDown') {
-            downPressed = false;
-        } else if (event.key === 'ArrowLeft') {
-            leftPressed = false;
-        } else if (event.key === 'ArrowRight') {
-            rightPressed = false;
-        }
+        upPressed = false;
+        downPressed = false;
+        leftPressed = false;
+        rightPressed = false;
     }
 }
 
 function keyDown(event) {
+    console.log(event);
     if(currentTypeCtrl == 0){
         currentTypeCtrl = 1;
         if (event.key === 'ArrowUp') {
@@ -253,10 +330,11 @@ function keyDown(event) {
     }
 }
 //Player movement
-const player = document.querySelector('#player');
-const playerMouth = player.querySelector('.mouth');
 
-function checkingCollision(direction, __step){
+let player = document.querySelector('#player');
+let playerMouth = player.querySelector('.mouth');
+
+function playerCollisionDetection(direction, __step){
     const walls = document.querySelectorAll('.wall');
     const enemies = document.querySelectorAll('.enemy');
     const points = document.querySelectorAll('.point');
@@ -288,12 +366,14 @@ function checkingCollision(direction, __step){
         ){
             // Collision detected
             __hitPoint = true;
-            point.className = 'collected';
+            point.classList.remove('point');
             collectPoint(__hitPoint);
         }
     });
+
     if(__pointLeft == 0){ //level up incresing difficulty
-        levelUp();
+        gameStatus = "UPLEVEL";
+        gameAction(gameStatus);
     }
 
     // Check collision with wall (next step depended on direction)
@@ -382,7 +462,7 @@ let checkValues;
 function movementAction(){
     if(movementEnable){
         if(downPressed) {
-            checkValues = checkingCollision("DOWN",step);
+            checkValues = playerCollisionDetection("DOWN",step);
             if(movEnableDirection["DOWN"]){ 
                 playerTop += step;
             }else{
@@ -393,7 +473,7 @@ function movementAction(){
             // console.log(movEnableDirection);
         }
         else if(upPressed) {
-            checkValues = checkingCollision("UP",step);
+            checkValues = playerCollisionDetection("UP",step);
             if(movEnableDirection["UP"]){ 
                 playerTop -= step;
             }else{
@@ -404,7 +484,7 @@ function movementAction(){
             // console.log(movEnableDirection);
         }
         else if(leftPressed) {
-            checkValues = checkingCollision("LEFT",step);
+            checkValues = playerCollisionDetection("LEFT",step);
             if(movEnableDirection["LEFT"]){ 
                 playerLeft -= step;
             }else{
@@ -415,7 +495,7 @@ function movementAction(){
             // console.log(movEnableDirection);
         }
         else if(rightPressed) {
-            checkValues = checkingCollision("RIGHT",step);
+            checkValues = playerCollisionDetection("RIGHT",step);
             if(movEnableDirection["RIGHT"]){ 
                 playerLeft += step;
             }else{
@@ -432,4 +512,18 @@ setInterval(function() {
     movementAction();
 }, 5);
 
-startButton.addEventListener('click',startGame);
+
+function initEventListener(){
+    for(let butt in touchButtons){
+        touchButtons[butt].addEventListener('mousedown',function(){
+            buttonDown(butt);
+        });
+        touchButtons[butt].addEventListener('mouseup',function(){
+            buttonUp(butt);
+        });
+    }
+
+    document.addEventListener('keydown', keyDown);
+    document.addEventListener('keyup', keyUp);
+    startButton.addEventListener('click',startGame);
+}
