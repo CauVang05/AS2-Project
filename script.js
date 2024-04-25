@@ -1,3 +1,4 @@
+
 let upPressed = false;
 let downPressed = false;
 let leftPressed = false;
@@ -10,7 +11,8 @@ const wallProbability = 0.3; //30% spawn wall
 
 let totalPoint = 0; //default is 0
 const dotPoint = 1; //able to modify
-let lives = 3
+let lives = 3;
+let enemyNums = 3;
 
 let playerTop = 0;
 let playerLeft = 0;
@@ -32,86 +34,20 @@ const touchButtons = {DOWN : touchDown, UP : touchUp, LEFT : touchLeft, RIGHT : 
 let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons 
 let hitGhostDetection = false;
 
-let preMaze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
-                [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-                [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-                [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-                [1, 0, 0, 1, 0, 3, 0, 0, 0, 1],
-                [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-                [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
-
-// let otherMaze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-//                 [1, 2, 0, 0, 0, 0, 0, 0, 3, 1],
+// let maze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+//                 [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
+//                 [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
 //                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-//                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-//                 [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-//                 [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-//                 [1, 0, 0, 0, 0, 3, 0, 0, 0, 1],
-//                 [1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+//                 [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+//                 [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+//                 [1, 0, 0, 1, 0, 3, 0, 0, 0, 1],
+//                 [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
 //                 [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
 //                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
 
-//Player = 2, Wall = 1, Enemy = 3, Point = 0
-function randomMaze(x, y){ //TODO: debug after finished almost essential requirements
-    // Establish letiables and starting grid
-    let totalCells = x*y;
-    let unvis = new Array();
-    let path = new Array();
-    for (let i = 0; i < y; i++) {
-        unvis[i] = new Array();
-        path[i] = new Array();
-        for (let j = 0; j < x; j++) {
-            // if(i == 0 || i == (y-1) || j == 0 || j == (x-1)){
-            //     unvis[i][j] = false;
-            //     path[i][j] = 1;
-            // }else{
-                unvis[i][j] = true;
-                path[i][j] = 0;
-            // }
-        }
-    }
+const mazeInit = new Maze(10,10,enemyNums);
 
-    // Set a random position to start from
-    let currentCell = [Math.floor(Math.random()*y), Math.floor(Math.random()*x)];
-    let saveCellChecked = [currentCell];
-    path[currentCell[0]][currentCell[1]] = 1;
-    unvis[currentCell[0]][currentCell[1]] = false;
-    let visited = 1;
-    
-    // Loop through all available cell positions
-    while (visited < totalCells) {
-        let pot = [[currentCell[0]-1, currentCell[1]],
-                        [currentCell[0], currentCell[1]+1],
-                        [currentCell[0]+1, currentCell[1]],
-                        [currentCell[0], currentCell[1]-1]];
-        let neighbors = new Array();
-        for(let l=0;l<4;l++){
-            if(pot[l][0] > -1 &&
-              pot[l][0] < y &&
-              pot[l][1] > -1 &&
-              pot[l][1] < x &&
-              unvis[pot[l][0]][pot[l][1]])
-            {
-                neighbors.push(pot[l]);
-            }
-        }
-        
-        if (neighbors.length){
-            nextPosition = neighbors[Math.floor(Math.random()*neighbors.length)];
-            path[nextPosition[0]][nextPosition[1]] = 1;
-            unvis[nextPosition[0]][nextPosition[1]] = false;
-            currentCell = nextPosition;
-            saveCellChecked.push(currentCell);
-            visited++;
-        }else{
-            currentCell = saveCellChecked.pop();
-        }
-    }
-    return path;
-}
+//Player = 2, Wall = 1, Enemy = 3, Point = 0
 
 //Populates the maze in the HTML
 function mazeGenerator(maze){
@@ -148,16 +84,16 @@ function mazeGenerator(maze){
 function clearMaze(){
     main.innerHTML = ''; // Clear previous maze
     //maze = randomMaze();
-    mazeGenerator(preMaze);
+    mazeGenerator(maze);
     player = document.querySelector('#player');
     playerMouth = player.querySelector('.mouth');
 }
 
-mazeGenerator(preMaze);
+let maze = mazeInit.randomMaze();
+mazeGenerator(maze);
 
 //Game operation
 function startGame(){
-    clearMaze();
     gameAction(gameStatus);
 } 
 
@@ -182,13 +118,20 @@ function gameAction(status){
                     playerLives.children[i].style.opacity = "100%";
                 }
             }
+            totalPoint = 0;
             scoreUpdating.textContent = totalPoint;
             startButton.style.display = 'none';
             break;
 
         case "ALIVE": //player move to another maze
             movementEnable = true;
+            playerTop = 0;
+            playerLeft = 0;
+            player.style.left = playerLeft + 'px';
+            player.style.top = playerTop + 'px';  
             startButton.style.display = 'none';
+            mazeInit.changeNumsEnemy(enemyNums);
+            maze = mazeInit.randomMaze();
             clearMaze();
             break;
 
@@ -208,7 +151,7 @@ function gameAction(status){
             setTimeout(function trigger(){
             gameStatus = "NEWGAME";
             hitGhostDetection = false;
-            totalPoint = 0;
+            enemyNums = 3;
             startButton.style.display = 'flex';
             playerTop = 0;
             playerLeft = 0;
@@ -221,10 +164,9 @@ function gameAction(status){
             movementEnable = false;
             gameStatus = 'ALIVE';
             startButton.style.display = 'flex';
-            playerTop = 0;
-            playerLeft = 0;
-            player.style.left = playerLeft + 'px';
-            player.style.top = playerTop + 'px';  
+            if(enemyNums < 5){
+                enemyNums++;
+            }
             statusName.textContent = 'Continue new level';  
             break;
     }
