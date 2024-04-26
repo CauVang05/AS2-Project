@@ -87,6 +87,8 @@ class Maze {
         while(enemyCount < this.enemyNums){
             let position = availablePos[Math.floor(Math.random()*availablePos.length)];
             newMaze[position[0]][position[1]] = 3;
+            const index = availablePos.indexOf(position);
+            availablePos.splice(index, 1); 
             enemyCount++;
         }
         return newMaze;
