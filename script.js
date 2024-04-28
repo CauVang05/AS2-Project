@@ -1,4 +1,3 @@
-
 let upPressed = false;
 let downPressed = false;
 let leftPressed = false;
@@ -33,6 +32,7 @@ const touchButtons = {DOWN : touchDown, UP : touchUp, LEFT : touchLeft, RIGHT : 
 
 let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons 
 let hitGhostDetection = false;
+let ghostMovement = {};
 
 // let maze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 //                 [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
@@ -51,6 +51,7 @@ const mazeInit = new Maze(10,10,enemyNums);
 
 //Populates the maze in the HTML
 function mazeGenerator(maze){
+    let indexDict = 0;
     for (let y of maze) {
         for (let x of y) {
             let block = document.createElement('div');
@@ -68,6 +69,8 @@ function mazeGenerator(maze){
                     break;
                 case 3:
                     block.classList.add('enemy');
+                    ghostMovement[indexDict] = new GhostMovement();
+                    indexDict++;
                     break;
                 default:
                     block.classList.add('point');
@@ -446,14 +449,28 @@ function movementAction(){
             player.style.left = playerLeft + 'px';
             playerMouth.classList = 'right';
             // console.log(movEnableDirection);
+        }else{
+            playerCollisionDetection("RIGHT",step);
         }
     }
 }
 
+function ghostRandMove(){
+    const enemies = document.querySelectorAll('.enemy');
+    let indexDict = 0;
+    enemies.forEach(enemy => {
+        ghostMovement[indexDict].move(enemy);
+        indexDict++;
+    });
+}
+
 setInterval(function() {
     movementAction();
-}, 5);
+}, 10);
 
+setInterval(function(){
+    ghostRandMove();
+}, 10);
 
 function initEventListener(){
     for(let butt in touchButtons){
