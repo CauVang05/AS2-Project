@@ -34,17 +34,6 @@ let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons
 let hitGhostDetection = false;
 let ghostMovement = {};
 
-// let maze =  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-//                 [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
-//                 [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-//                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-//                 [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-//                 [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-//                 [1, 0, 0, 1, 0, 3, 0, 0, 0, 1],
-//                 [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-//                 [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
-//                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
-
 const mazeInit = new Maze(10,10,enemyNums);
 
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
@@ -84,9 +73,10 @@ function mazeGenerator(maze){
 }
 
 //Clear current maze and generate new maze
-function clearMaze(){
+function resetMaze(){
     main.innerHTML = ''; // Clear previous maze
     //maze = randomMaze();
+    ghostMovement = {};
     mazeGenerator(maze);
     player = document.querySelector('#player');
     playerMouth = player.querySelector('.mouth');
@@ -114,7 +104,10 @@ function gameAction(status){
             gameStatus = "ALIVE";
             if(lives == 0){
                 lives = 3;
-                clearMaze();
+                enemyNums = 3;
+                mazeInit.changeNumsEnemy(enemyNums);
+                maze = mazeInit.randomMaze();
+                resetMaze();
                 player.classList.remove("dead");
                 player.style.transform = "scale(1)";
                 for (let i = 0; i<lives; i++){
@@ -135,7 +128,7 @@ function gameAction(status){
             startButton.style.display = 'none';
             mazeInit.changeNumsEnemy(enemyNums);
             maze = mazeInit.randomMaze();
-            clearMaze();
+            resetMaze();
             break;
 
         case "DEAD":
@@ -154,7 +147,6 @@ function gameAction(status){
             setTimeout(function trigger(){
             gameStatus = "NEWGAME";
             hitGhostDetection = false;
-            enemyNums = 3;
             startButton.style.display = 'flex';
             playerTop = 0;
             playerLeft = 0;
@@ -185,19 +177,6 @@ function hitGhost(){
     playerLives.children[lives].style.opacity = "0%";
     gameAction(gameStatus);
 }
-
-
-// for(let butt in touchButtons){
-//     touchButtons[butt].addEventListener('mousedown',function(){
-//         buttonDown(butt);
-//     });
-//     touchButtons[butt].addEventListener('mouseup',function(){
-//         buttonUp(butt);
-//     });
-// }
-
-// document.addEventListener('keydown', keyDown);
-// document.addEventListener('keyup', keyUp);
 
 initEventListener();
 
@@ -456,21 +435,23 @@ function movementAction(){
 }
 
 function ghostRandMove(){
-    const enemies = document.querySelectorAll('.enemy');
-    let indexDict = 0;
-    enemies.forEach(enemy => {
-        ghostMovement[indexDict].move(enemy);
-        indexDict++;
-    });
+    if(movementEnable){
+        const enemies = document.querySelectorAll('.enemy');
+        let indexDict = 0;
+        enemies.forEach(enemy => {
+            ghostMovement[indexDict].move(enemy);
+            indexDict++;
+        });
+    }
 }
 
 setInterval(function() {
     movementAction();
-}, 10);
+}, 5);
 
 setInterval(function(){
     ghostRandMove();
-}, 10);
+},10);
 
 function initEventListener(){
     for(let butt in touchButtons){

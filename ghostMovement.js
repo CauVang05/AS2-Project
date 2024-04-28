@@ -1,23 +1,24 @@
 class GhostMovement{
     constructor() {
-        this.step = 100;
+        this.step = 60;
         this.posX = 0;
         this.posY = 0;
         this.direction = null;
-        this.lastDirect = null;
+        this.hitWall = false;
     }
 
     move(ghost){
         const ghostReact = ghost.getBoundingClientRect();
-        
-    }
+        let nextDirection = this.__moveDirection();
+        let potsMove = ["DOWN","UP","LEFT","RIGHT"];
 
-    __updateLastDirection(preDirect){
-        this.lastDirect = preDirect;
-    }
-
-    __lastDirection(){
-        return this.lastDirect;
+        if(this.direction == null || this.hitWall == true){
+            nextDirection = this.randomDirection(potsMove);
+            this.__updateDriection(nextDirection);
+        }   
+        if(this.__checkCurrentPosition(ghostReact, nextDirection)){
+            this.updatePosition(ghost,nextDirection);
+        }
     }
 
     __updateDriection(newDirect){
@@ -80,65 +81,8 @@ class GhostMovement{
                     break;
             }
         });
+        this.hitWall = !result;
         return result;
-    }
-
-    potentialMovement(ghostReact){
-        let ghostLeft = ghostReact.left - this.step;
-        let ghostRight = ghostReact.right + this.step;
-        let ghostBottom = ghostReact.bottom + this.step;
-        let ghostTop = ghostReact.top - this.step;
-        const directions = ["DOWN","UP","LEFT","RIGHT"];
-        let ways = ["DOWN","UP","LEFT","RIGHT"];
-        const walls = document.querySelectorAll('.wall');
-        walls.forEach(wall => {
-            const wallRect = wall.getBoundingClientRect();
-            for(let i of directions){
-                switch (i){
-                    case "DOWN": 
-                        if( ghostBottom > wallRect.top && 
-                            ghostReact.left < wallRect.right &&
-                            ghostReact.right > wallRect.left &&
-                            ghostReact.top < wallRect.bottom)
-                        {
-                            ways.splice('DOWN',1);
-                        }
-                        break;
-                    
-                    case "UP":
-                        if(ghostReact.left < wallRect.right &&
-                            ghostReact.right > wallRect.left &&
-                            ghostTop < wallRect.bottom &&
-                            ghostReact.bottom > wallRect.top)
-                        {
-                            ways.splice('UP',1);
-                        }
-                        break;
-                    
-                    case "LEFT":
-                        if(ghostLeft < wallRect.right &&
-                            ghostReact.right > wallRect.left &&
-                            ghostReact.top < wallRect.bottom &&
-                            ghostReact.bottom > wallRect.top)
-                        {                        
-                            ways.splice('LEFT',1);
-                        }
-                        break;
-                    
-                    case "RIGHT":
-                        if(ghostReact.left < wallRect.right &&
-                            ghostRight > wallRect.left &&
-                            ghostReact.top < wallRect.bottom &&
-                            ghostReact.bottom > wallRect.top)
-                        {
-                            ways.splice('RIGHT',1);
-                        }
-                        break;
-                }
-            }
-        });
-
-        return ways;
     }
 
     randomDirection(directions){
