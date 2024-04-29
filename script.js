@@ -8,7 +8,7 @@ let movementEnable = false;
 let gameStatus = "NEWGAME"; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
 const wallProbability = 0.3; //30% spawn wall
 
-let totalPoint = 78; //default is 0
+let totalPoint = 0; //default is 0
 const dotPoint = 1; //able to modify
 let lives = 3;
 let enemyNums = 3;
@@ -89,9 +89,7 @@ mazeGenerator(maze);
 
 //Game operation
 function startGame(){
-    playerInform.inputName();
-    playerInform.saveScore(totalPoint);
-    // gameAction(gameStatus);
+    gameAction(gameStatus);
 } 
 
 function collectPoint(collected){

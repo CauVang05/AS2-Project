@@ -29,30 +29,25 @@ class PlayerRecord{
     }
     __sortScore(leaderboard){ //TODO: FIX BUG UPDATE WRONG DATA
         let finalLeaderboard = {};
-        let scoreList = [];
-        let playerList = [];
-        let count = 0;
-        for(let i in leaderboard){
-            scoreList.push(leaderboard[i]);
-        }
-        scoreList.sort(function(a, b){return b - a});
-        for(let z in leaderboard){
-            for(let j of scoreList){
-                if(j == leaderboard[z]){
-                    playerList.push(z);
-                    break;
+        let tempororyDict = {};
+        let counter = 0;
+        const dictLenght = Object.keys(leaderboard).length;
+        while(counter < dictLenght){
+            let maxNums = null;
+            for(let key in leaderboard){
+                if(null == maxNums || leaderboard[key] > maxNums){
+                    maxNums = leaderboard[key];
+                    tempororyDict[counter] = [key,maxNums];
                 }
             }
+            delete leaderboard[tempororyDict[counter][0]];
+            counter++;
         }
 
-        if(scoreList.length > 6){
-            scoreList.pop();
-            playerList.pop();
-        }
-
-        while(count < playerList.length){
-            finalLeaderboard[playerList[count]] = scoreList[count];
-            count++;
+        for(let i in tempororyDict){
+            if(i < 6){ //6 first top player
+                finalLeaderboard[tempororyDict[i][0]] = tempororyDict[i][1];
+            }
         }
         return finalLeaderboard;
     }
