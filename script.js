@@ -8,7 +8,7 @@ let movementEnable = false;
 let gameStatus = "NEWGAME"; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
 const wallProbability = 0.3; //30% spawn wall
 
-let totalPoint = 0; //default is 0
+let totalPoint = 78; //default is 0
 const dotPoint = 1; //able to modify
 let lives = 3;
 let enemyNums = 3;
@@ -35,6 +35,8 @@ let hitGhostDetection = false;
 let ghostMovement = {};
 
 const mazeInit = new Maze(10,10,enemyNums);
+const playerInform = new PlayerRecord();
+playerInform.initLeaderboard();
 
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
 
@@ -87,7 +89,9 @@ mazeGenerator(maze);
 
 //Game operation
 function startGame(){
-    gameAction(gameStatus);
+    playerInform.inputName();
+    playerInform.saveScore(totalPoint);
+    // gameAction(gameStatus);
 } 
 
 function collectPoint(collected){
@@ -153,6 +157,7 @@ function gameAction(status){
             player.style.left = playerLeft + 'px';
             player.style.top = playerTop + 'px';  
             statusName.textContent = 'Game Over, restart a new game?';},1500);
+            setTimeout(function trigger(){playerInform.inputName();playerInform.saveScore(totalPoint);},2000);
             break;
 
         case "UPLEVEL":
@@ -239,7 +244,6 @@ function keyUp() {
 }
 
 function keyDown(event) {
-    console.log(event);
     if(currentTypeCtrl == 0){
         currentTypeCtrl = 1;
         if (event.key === 'ArrowUp') {
