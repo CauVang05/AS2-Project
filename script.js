@@ -258,7 +258,7 @@ function keyDown(event) {
 //Player movement
 
 let player = document.querySelector('#player');
-let playerMouth = player.querySelector('.mouth');
+// let playerMouth = player.querySelector('.mouth'); //TODO: REDO THIS HIGHLIGHT AFTER DEBUGGING
 
 function playerCollisionDetection(direction, __step){
     const walls = document.querySelectorAll('.wall');

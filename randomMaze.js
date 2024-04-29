@@ -9,37 +9,25 @@ class Maze {
         this.enemyNums = enemy;
     }
 
-    randomMaze(){
-        // let totalCells = this.x*this.y;
+    randomMaze(){ //using Randomized Prim's Algorithm 
         let cellChecker = new Array();
         let maze = new Array();
         let potCells = new Array();
     
-        for (let i = 0; i < this.y; i++) {
+        for (let i = 0; i < ((this.y)); i++) {
             cellChecker[i] = new Array();
             maze[i] = new Array();
-            for (let j = 0; j < this.x; j++) {
-                if(i == 0 || i == (this.y-1) || j == 0 || j == (this.x-1)){
-                    cellChecker[i][j] = false;
-                    maze[i][j] = 1;
-                }else if (i == 1 && j == 1){
-                    cellChecker[i][j] = false;
-                    maze[i][j] = 2;
-                }else{
-                    cellChecker[i][j] = true;
-                    maze[i][j] = 1;
-                }
+            for (let j = 0; j < ((this.x)); j++) {
+                cellChecker[i][j] = true;
+                maze[i][j] = 1;
             }
         }
     
         // Set a random position to start from
-        let currentCell = [Math.floor(Math.random()*this.y), Math.floor(Math.random()*this.x)];
+        let currentCell = [Math.floor(Math.random()*((this.y))), Math.floor(Math.random()*((this.x)))];
         let removedCell = [0, 0];
         let chosenCellNum = 0;
 
-        while(cellChecker[currentCell[0]][currentCell[1]] != true){
-            currentCell = [Math.floor(Math.random()*this.y), Math.floor(Math.random()*this.x)];
-        }
         maze[currentCell[0]][currentCell[1]] = 0;
         cellChecker[currentCell[0]][currentCell[1]] = false;
         let neighbours = [[[currentCell[0]-2, currentCell[1]], [currentCell[0]-1, currentCell[1]]], //TOP  || the 3th & 4th arguments is the cell next to the predicted cell
@@ -48,12 +36,13 @@ class Maze {
                         [[currentCell[0], currentCell[1]-2], [currentCell[0], currentCell[1]-1]]];//LEFT   || the 3th & 4th arguments is the cell next to the predicted cell
         for(let cell of neighbours){
             if (cell[0][0] > -1 &&
-                cell[0][0] < this.y &&
+                cell[0][0] < ((this.y)) &&
                 cell[0][1] > -1 &&
-                cell[0][1] < this.x &&
+                cell[0][1] < ((this.x)) &&
                 cellChecker[cell[0][0]][cell[0][1]])
             {
                 potCells.push(cell);
+                cellChecker[cell[0][0]][cell[0][1]] = false;
             }
         }
         chosenCellNum = Math.floor(Math.random()*potCells.length);
@@ -70,12 +59,14 @@ class Maze {
                         [[currentCell[0], currentCell[1]-2], [currentCell[0], currentCell[1]-1]]];//LEFT   || the 3th & 4th arguments is the cell next to the predicted cell
             for(let c of neighbours){
                 if (c[0][0] > -1 &&
-                    c[0][0] < this.y &&
+                    c[0][0] < ((this.y)) &&
                     c[0][1] > -1 &&
-                    c[0][1] < this.x &&
-                    cellChecker[c[0][0]][c[0][1]])
+                    c[0][1] < ((this.x)) &&
+                    cellChecker[c[0][0]][c[0][1]]
+                )
                 {
                     potCells.push(c);
+                    cellChecker[c[0][0]][c[0][1]] = false;
                 }
             }
             chosenCellNum = Math.floor(Math.random()*potCells.length);
@@ -84,10 +75,10 @@ class Maze {
             cellChecker = this.__cellChecker(cellChecker,removedCell,currentCell);
             maze = this.__createPath(maze,removedCell,currentCell);
             potCells.splice(chosenCellNum,1);
-            // console.log(chosenCellNum);
         }
-            
-        // maze = this.__randomEnemyPos(maze); //TODO: TURN IT BACK AFTER CREATE RANDOM MAZE        
+        
+        maze = this.__mazeCompletion(maze);
+        maze = this.__randomEnemyPos(maze);       
         return maze;
     }
 
@@ -121,6 +112,20 @@ class Maze {
         currentCellChecker[removedCell[0]][removedCell[1]] = false;
         currentCellChecker[currentCell[0]][currentCell[1]] = false;
         return currentCellChecker;
+    }
+    __mazeCompletion(randomMaze){ //finish the left of aspects to finish the maze
+        for(let i = 0; i < this.y; i++){
+            for(let j = 0; j < this.x; j++){
+                if(i == 0 || i == (this.y-1) || j == 0 || j == (this.x-1)){
+                    randomMaze[i][j] = 1;
+                }else if (i == 1 && j == 1){
+                    randomMaze[i][j] = 2;
+                }else if (i == 1 || i == (this.y-2) || j == 1 || j == (this.x-2)){
+                    randomMaze[i][j] = 0;
+                }
+            }
+        }
+        return randomMaze
     }
 }
 
