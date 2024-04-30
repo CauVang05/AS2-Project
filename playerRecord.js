@@ -12,6 +12,7 @@ class PlayerRecord{
             temporaryBoard[i] = parseInt(previousPoint);
         }
         this.leaderboard = this.__sortScore(temporaryBoard);
+        // console.log(this.leaderboard);
         this.__displayLeaderboard(this.leaderboard);
     }
     inputName(){
@@ -20,6 +21,7 @@ class PlayerRecord{
     saveScore(score){
         let currentLeaderboard = this.leaderboard; 
         currentLeaderboard[this.name] = score;
+        // console.log(this.leaderboard);
         this.leaderboard = this.__sortScore(currentLeaderboard);
         this.__displayLeaderboard(this.leaderboard);
         localStorage.clear();
@@ -27,7 +29,7 @@ class PlayerRecord{
             localStorage.setItem(i,this.leaderboard[i].toString());
         }
     }
-    __sortScore(leaderboard){ //TODO: FIX BUG UPDATE WRONG DATA
+    __sortScore(leaderboard){ 
         let finalLeaderboard = {};
         let tempororyDict = {};
         let counter = 0;
@@ -49,6 +51,7 @@ class PlayerRecord{
                 finalLeaderboard[tempororyDict[i][0]] = tempororyDict[i][1];
             }
         }
+        
         return finalLeaderboard;
     }
 
