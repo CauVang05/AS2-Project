@@ -94,6 +94,25 @@ main {
     grid-area: score;
 }
 
+.ghostspeed{
+    padding-bottom: 1em;
+}
+.ghostspeed > ul{
+    list-style: none;
+    display: flex;
+}
+.ghostspeed > ul > li{
+    display: block;
+    
+    padding: 1em;
+}
+.ghostspeed > ul > li > a{
+    text-decoration: none;
+}
+.ghostspeed > ul > li > a:hover{
+    color: aqua;
+}
+
 .leaderboard {
     grid-area: lboard;
 }
