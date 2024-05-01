@@ -12,6 +12,7 @@ let totalPoint = 0; //default is 0
 const dotPoint = 1; //able to modify
 let lives = 3;
 let enemyNums = 3;
+let ghostSpeed = 12; //default is easy
 
 let playerTop = 0;
 let playerLeft = 0;
@@ -31,7 +32,7 @@ const touchRight = document.getElementById('rbttn');
 const touchButtons = {DOWN : touchDown, UP : touchUp, LEFT : touchLeft, RIGHT : touchRight};
 
 let currentTypeCtrl = 0; //0: null || 1: arrow key || 2: buttons 
-let hitGhostDetection = false;
+let hitGhostDetection = null;
 let ghostMovement = {};
 
 const mazeInit = new Maze(10,10,enemyNums);
@@ -92,6 +93,11 @@ function startGame(){
     gameAction(gameStatus);
 } 
 
+function sumitPlayerName(){
+    playerInform.inputName(totalPoint);
+    document.querySelector(".entername").style.top = "-100%";
+}
+
 function collectPoint(collected){
     if(collected){
         totalPoint += dotPoint;
@@ -102,6 +108,7 @@ function collectPoint(collected){
 function gameAction(status){
     switch (status){
         case "NEWGAME":
+            hitGhostDetection = null;
             movementEnable = true;
             gameStatus = "ALIVE";
             if(lives == 0){
@@ -116,6 +123,7 @@ function gameAction(status){
                     playerLives.children[i].style.opacity = "100%";
                 }
             }
+            setTimeout(function trigger(){hitGhostDetection = false;},1500); //undead for 1.5s 
             totalPoint = 0;
             scoreUpdating.textContent = totalPoint;
             startButton.style.display = 'none';
@@ -131,6 +139,7 @@ function gameAction(status){
             mazeInit.changeNumsEnemy(enemyNums);
             maze = mazeInit.randomMaze();
             resetMaze();
+            setTimeout(function trigger(){hitGhostDetection = false;},1500); //undead for 1.5s 
             break;
 
         case "DEAD":
@@ -146,19 +155,19 @@ function gameAction(status){
         case "GAMEOVER":
             movementEnable = false;
             player.classList.add("dead");
-            setTimeout(function trigger(){
             gameStatus = "NEWGAME";
-            hitGhostDetection = false;
+            setTimeout(function trigger(){
+            document.querySelector(".entername").style.top = "0%";
             startButton.style.display = 'flex';
             playerTop = 0;
             playerLeft = 0;
             player.style.left = playerLeft + 'px';
             player.style.top = playerTop + 'px';  
             statusName.textContent = 'Game Over, restart a new game?';},1500);
-            setTimeout(function trigger(){playerInform.inputName();playerInform.saveScore(totalPoint);},2000);
             break;
 
         case "UPLEVEL":
+            hitGhostDetection = null;
             movementEnable = false;
             gameStatus = 'ALIVE';
             startButton.style.display = 'flex';
@@ -447,13 +456,38 @@ function ghostRandMove(){
     }
 }
 
+let ghostOperation = setInterval(function(){
+                        ghostRandMove();
+                     },ghostSpeed);
+ghostSpeedChange("easy");
+function ghostSpeedChange(mode){
+    if(gameStatus == "NEWGAME"){
+        const textsContent = document.querySelectorAll('.ghost');
+        textsContent.forEach(text =>{
+            text.style.color = "white";
+        })
+        clearInterval(ghostOperation);
+        switch(mode){
+            case "easy":
+                ghostSpeed = 12;
+                break;
+            case "medium":
+                ghostSpeed = 10;
+                break;
+            case "hard":
+                ghostSpeed = 6;
+                break;
+        }
+        document.getElementById(mode).style.color = "aqua";
+        ghostOperation = setInterval(function(){
+                            ghostRandMove();
+                        },ghostSpeed);
+    }
+}
+
 setInterval(function() {
     movementAction();
-}, 5);
-
-setInterval(function(){
-    ghostRandMove();
-},10);
+}, 8);
 
 function initEventListener(){
     for(let butt in touchButtons){

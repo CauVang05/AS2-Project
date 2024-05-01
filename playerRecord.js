@@ -7,21 +7,28 @@ class PlayerRecord{
     initLeaderboard(){
         const availablePlayer = this.__getAllKeys();
         let temporaryBoard = {};
-        for(let i of availablePlayer){
-            let previousPoint = localStorage.getItem(i);
-            temporaryBoard[i] = parseInt(previousPoint);
+        if(availablePlayer.length < 6){ //if the local storage is less than 6 elements
+            temporaryBoard = {"Chris":100, "Mark":75, "Tom":50, "John":45, "John2":40, "John3": 35};
+        }else{
+            for(let i of availablePlayer){
+                let previousPoint = localStorage.getItem(i);
+                temporaryBoard[i] = parseInt(previousPoint);
+            }
         }
         this.leaderboard = this.__sortScore(temporaryBoard);
-        // console.log(this.leaderboard);
         this.__displayLeaderboard(this.leaderboard);
     }
-    inputName(){
-        this.name = prompt('Please enter your name:');
+    inputName(score){
+        const inputField = document.getElementById("playername");
+        this.name = inputField.value;
+        if('' == this.name){
+            this.name = "unknown";
+        }
+        this.saveScore(score);
     }
     saveScore(score){
         let currentLeaderboard = this.leaderboard; 
         currentLeaderboard[this.name] = score;
-        // console.log(this.leaderboard);
         this.leaderboard = this.__sortScore(currentLeaderboard);
         this.__displayLeaderboard(this.leaderboard);
         localStorage.clear();

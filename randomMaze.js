@@ -30,10 +30,10 @@ class Maze {
 
         maze[currentCell[0]][currentCell[1]] = 0;
         cellChecker[currentCell[0]][currentCell[1]] = false;
-        let neighbours = [[[currentCell[0]-2, currentCell[1]], [currentCell[0]-1, currentCell[1]]], //TOP  || the 3th & 4th arguments is the cell next to the predicted cell
-                        [[currentCell[0], currentCell[1]+2], [currentCell[0], currentCell[1]+1]], //RIGHT  || the 3th & 4th arguments is the cell next to the predicted cell
-                        [[currentCell[0]+2, currentCell[1]], [currentCell[0]+1, currentCell[1]]], //BOTTOM || the 3th & 4th arguments is the cell next to the predicted cell
-                        [[currentCell[0], currentCell[1]-2], [currentCell[0], currentCell[1]-1]]];//LEFT   || the 3th & 4th arguments is the cell next to the predicted cell
+        let neighbours = [[[currentCell[0]-2, currentCell[1]], [currentCell[0]-1, currentCell[1]]], //TOP  || the second arguments is the cell next to the predicted cell
+                        [[currentCell[0], currentCell[1]+2], [currentCell[0], currentCell[1]+1]], //RIGHT  || the second arguments is the cell next to the predicted cell
+                        [[currentCell[0]+2, currentCell[1]], [currentCell[0]+1, currentCell[1]]], //BOTTOM || the second arguments is the cell next to the predicted cell
+                        [[currentCell[0], currentCell[1]-2], [currentCell[0], currentCell[1]-1]]];//LEFT   || the second arguments is the cell next to the predicted cell
         for(let cell of neighbours){
             if (cell[0][0] > -1 &&
                 cell[0][0] < ((this.y)) &&
@@ -42,7 +42,7 @@ class Maze {
                 cellChecker[cell[0][0]][cell[0][1]])
             {
                 potCells.push(cell);
-                cellChecker[cell[0][0]][cell[0][1]] = false;
+                cellChecker[cell[0][0]][cell[0][1]] = false; //THIS ONE SOLVE THE PROBLEM
             }
         }
         chosenCellNum = Math.floor(Math.random()*potCells.length);
@@ -53,10 +53,10 @@ class Maze {
         potCells.splice(chosenCellNum,1);
         // Loop 
         while(0 < potCells.length){
-            neighbours = [[[currentCell[0]-2, currentCell[1]], [currentCell[0]-1, currentCell[1]]], //TOP  || the 3th & 4th arguments is the cell next to the predicted cell
-                        [[currentCell[0], currentCell[1]+2], [currentCell[0], currentCell[1]+1]], //RIGHT  || the 3th & 4th arguments is the cell next to the predicted cell
-                        [[currentCell[0]+2, currentCell[1]], [currentCell[0]+1, currentCell[1]]], //BOTTOM || the 3th & 4th arguments is the cell next to the predicted cell
-                        [[currentCell[0], currentCell[1]-2], [currentCell[0], currentCell[1]-1]]];//LEFT   || the 3th & 4th arguments is the cell next to the predicted cell
+            neighbours = [[[currentCell[0]-2, currentCell[1]], [currentCell[0]-1, currentCell[1]]], //TOP  || the second arguments is the cell next to the predicted cell
+                        [[currentCell[0], currentCell[1]+2], [currentCell[0], currentCell[1]+1]], //RIGHT  || the second arguments is the cell next to the predicted cell
+                        [[currentCell[0]+2, currentCell[1]], [currentCell[0]+1, currentCell[1]]], //BOTTOM || the second arguments is the cell next to the predicted cell
+                        [[currentCell[0], currentCell[1]-2], [currentCell[0], currentCell[1]-1]]];//LEFT   || the second arguments is the cell next to the predicted cell
             for(let c of neighbours){
                 if (c[0][0] > -1 &&
                     c[0][0] < ((this.y)) &&
@@ -66,7 +66,7 @@ class Maze {
                 )
                 {
                     potCells.push(c);
-                    cellChecker[c[0][0]][c[0][1]] = false;
+                    cellChecker[c[0][0]][c[0][1]] = false; //THIS ONE SOLVE THE PROBLEM
                 }
             }
             chosenCellNum = Math.floor(Math.random()*potCells.length);

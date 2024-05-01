@@ -27,6 +27,12 @@
         </div>
     </div>
 
+    <div class="entername">
+        <h1>Enter your name</h1>
+        <input type="text" id="playername" placeholder="Player name" required>
+        <button onclick="sumitPlayerName()">Enter</button>
+    </div>
+
     <div class="leaderboard">
         <h1>LeaderBoard:</h1>
         <ol>
@@ -43,13 +49,13 @@
         <h1>Ghost speed</h1>
         <ul>
             <li>
-                <a href="#">Easy</a>
+                <a href="#" class="ghost" id="easy" onclick="ghostSpeedChange(this.id)">Easy</a>
             </li>
             <li>
-                <a href="#">Medium</a>
+                <a href="#" class="ghost" id="medium" onclick="ghostSpeedChange(this.id)">Medium</a>
             </li>
             <li>
-                <a href="#">Hard</a>
+                <a href="#" class="ghost" id="hard" onclick="ghostSpeedChange(this.id)">Hard</a>
             </li>
         </ul>
     </div>
