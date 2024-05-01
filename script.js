@@ -13,6 +13,7 @@ const dotPoint = 1; //able to modify
 let lives = 3;
 let enemyNums = 3;
 let ghostSpeed = 12; //default is easy
+let mazeSize = 10;
 
 let playerTop = 0;
 let playerLeft = 0;
@@ -95,6 +96,9 @@ function startGame(){
         gameStatus = "NEWGAME";
         lives = 3;
         enemyNums = 3;
+        mazeSize = 10;
+        main.style.gridTemplateColumns = "repeat(10,10%)";
+        mazeInit.changeMazeSize(mazeSize);
         mazeInit.changeNumsEnemy(enemyNums);
         maze = mazeInit.randomMaze();
         resetMaze();
@@ -141,6 +145,8 @@ function gameAction(status){
             player.style.left = playerLeft + 'px';
             player.style.top = playerTop + 'px';  
             startButton.style.display = 'none';
+            main.style.gridTemplateColumns = "repeat(20,5%)";
+            mazeInit.changeMazeSize(mazeSize);
             mazeInit.changeNumsEnemy(enemyNums);
             maze = mazeInit.randomMaze();
             resetMaze();
@@ -175,8 +181,11 @@ function gameAction(status){
             movementEnable = false;
             gameStatus = 'ALIVE';
             startButton.style.display = 'flex';
-            if(enemyNums < 5){
+            if(enemyNums < 5){ //maxinum number of enemy before change the maze
                 enemyNums++;
+            }else{
+                enemyNums++;
+                mazeSize = 20;
             }
             statusName.textContent = 'Continue new level';  
             break;
@@ -396,7 +405,7 @@ function playerCollisionDetection(direction, __step){
     return {"point":__hitPoint,"wall":__hitWall,"ghost":__hitGhost};
 }
 
-let checkValues;
+let checkValues; //easier to debug
 
 function movementAction(){
     if(movementEnable){

@@ -9,6 +9,11 @@ class Maze {
         this.enemyNums = enemy;
     }
 
+    changeMazeSize(mazeSize){
+        this.x = mazeSize;
+        this.y = mazeSize;
+    }
+
     randomMaze(){ //using Randomized Prim's Algorithm 
         let cellChecker = new Array();
         let maze = new Array();
