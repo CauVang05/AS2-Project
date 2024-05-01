@@ -5,8 +5,8 @@ let rightPressed = false;
 let movEnableDirection = {UP:true, DOWN:true, LEFT:true, RIGHT:true};
 
 let movementEnable = false;
-let gameStatus = "NEWGAME"; //player's status: ALIVE, DEAD, UPLEVEL, GAMEOVER
-const wallProbability = 0.3; //30% spawn wall
+let gameStatus = "NEWGAME"; //player's status: NEWGAME, ALIVE, DEAD, UPLEVEL, GAMEOVER
+let submited = true; //false: cannot start game  ||  true: okay 
 
 let totalPoint = 0; //default is 0
 const dotPoint = 1; //able to modify
@@ -90,15 +90,28 @@ mazeGenerator(maze);
 
 //Game operation
 function startGame(){
-    if(gameStatus == "GAMEOVER"){
+    if(gameStatus == "GAMEOVER" && submited){
         statusName.textContent = 'Start';
         gameStatus = "NEWGAME";
-    }else{
+        lives = 3;
+        enemyNums = 3;
+        mazeInit.changeNumsEnemy(enemyNums);
+        maze = mazeInit.randomMaze();
+        resetMaze();
+        player.classList.remove("dead");
+        player.style.transform = "scale(1)";
+        for (let i = 0; i<lives; i++){
+            playerLives.children[i].style.opacity = "100%";
+        }
+        totalPoint = 0;
+        scoreUpdating.textContent = totalPoint;
+    }else if(submited || gameStatus == "ALIVE"){
         gameAction(gameStatus);
     }
 } 
 
-function sumitPlayerName(){ //TODO: UNTIL SUBMIT NAME => PLAYER CAN RESTART GAME
+function sumitPlayerName(){ 
+    submited = true;
     playerInform.inputName(totalPoint);
     document.querySelector(".entername").style.top = "-100%";
 }
@@ -116,21 +129,8 @@ function gameAction(status){
             hitGhostDetection = null;
             movementEnable = true;
             gameStatus = "ALIVE";
-            if(lives == 0){
-                lives = 3;
-                enemyNums = 3;
-                mazeInit.changeNumsEnemy(enemyNums);
-                maze = mazeInit.randomMaze();
-                resetMaze();
-                player.classList.remove("dead");
-                player.style.transform = "scale(1)";
-                for (let i = 0; i<lives; i++){
-                    playerLives.children[i].style.opacity = "100%";
-                }
-            }
             setTimeout(function trigger(){hitGhostDetection = false;},1500); //undead for 1.5s 
-            totalPoint = 0;
-            scoreUpdating.textContent = totalPoint;
+            submited = false;
             startButton.style.display = 'none';
             break;
 
