@@ -136,6 +136,7 @@ main {
 }
 .ghost{
     text-decoration: none;
+    pointer-events: visible;
 }
 
 .leaderboard {

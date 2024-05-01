@@ -90,10 +90,15 @@ mazeGenerator(maze);
 
 //Game operation
 function startGame(){
-    gameAction(gameStatus);
+    if(gameStatus == "GAMEOVER"){
+        statusName.textContent = 'Start';
+        gameStatus = "NEWGAME";
+    }else{
+        gameAction(gameStatus);
+    }
 } 
 
-function sumitPlayerName(){
+function sumitPlayerName(){ //TODO: UNTIL SUBMIT NAME => PLAYER CAN RESTART GAME
     playerInform.inputName(totalPoint);
     document.querySelector(".entername").style.top = "-100%";
 }
@@ -155,7 +160,6 @@ function gameAction(status){
         case "GAMEOVER":
             movementEnable = false;
             player.classList.add("dead");
-            gameStatus = "NEWGAME";
             setTimeout(function trigger(){
             document.querySelector(".entername").style.top = "0%";
             startButton.style.display = 'flex';
@@ -163,7 +167,7 @@ function gameAction(status){
             playerLeft = 0;
             player.style.left = playerLeft + 'px';
             player.style.top = playerTop + 'px';  
-            statusName.textContent = 'Game Over, restart a new game?';},1500);
+            statusName.textContent = 'Game Over, restart';},1500);
             break;
 
         case "UPLEVEL":
