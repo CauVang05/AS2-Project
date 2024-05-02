@@ -145,7 +145,9 @@ function gameAction(status){
             player.style.left = playerLeft + 'px';
             player.style.top = playerTop + 'px';  
             startButton.style.display = 'none';
-            main.style.gridTemplateColumns = "repeat(20,5%)";
+            if(enemyNums > 5){
+                main.style.gridTemplateColumns = "repeat(20,5%)";
+            }
             mazeInit.changeMazeSize(mazeSize);
             mazeInit.changeNumsEnemy(enemyNums);
             maze = mazeInit.randomMaze();
@@ -500,7 +502,7 @@ function ghostSpeedChange(mode){
 
 setInterval(function() {
     movementAction();
-}, 8);
+}, 8); //player movement speed
 
 function initEventListener(){
     for(let butt in touchButtons){
